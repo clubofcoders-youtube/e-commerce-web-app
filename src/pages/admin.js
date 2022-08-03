@@ -1,10 +1,11 @@
 import React from 'react';
 import Layout from '../components/Layout';
+import ProductForm from '../components/Product/ProductForm';
 
 const AdminPage = () => {
   return (
     <Layout>
-      {/* //todo: add a product //todo: edit a product //todo: delete a product */}
+      <ProductForm />
     </Layout>
   );
 };
