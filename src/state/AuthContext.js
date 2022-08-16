@@ -7,7 +7,10 @@ const intialAuthState = {
   session: null,
 };
 
-export const AuthContext = createContext(intialAuthState);
+export const AuthContext = createContext({
+  state: intialAuthState,
+  dispatch: () => {},
+});
 
 const authReducer = (state, action) => {
   switch (action.type) {
@@ -39,7 +42,7 @@ const AuthContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, intialAuthState);
 
   useEffect(() => {
-    dispatch({ type: 'LOGIN', session: supabase.auth.session });
+    dispatch({ type: 'LOGIN', session: supabase.auth.session() });
     supabase.auth.onAuthStateChange((event, session) => {
       dispatch({ type: 'LOGIN', session });
     });

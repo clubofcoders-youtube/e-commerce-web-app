@@ -2,6 +2,7 @@ import React, { useContext, useState } from 'react';
 import toast from 'react-hot-toast';
 import useForm from '../../hooks/useForm';
 import { AuthContext } from '../../state/AuthContext';
+import { showErrorToast } from '../../utils';
 import { supabase } from '../../utils/supabaseClient';
 
 const Auth = () => {
@@ -35,7 +36,10 @@ const Auth = () => {
         }
       );
 
-      if (signUpError) toast.error(signUpError.message);
+      if (signUpError) {
+        showErrorToast(signUpError.message, setLoading);
+        return;
+      }
 
       await supabase.from('user').insert([
         {
@@ -48,7 +52,9 @@ const Auth = () => {
         password: form.password,
       });
 
-      if (error) toast.error(error.message);
+      if (error) {
+        return showErrorToast(error.message, setLoading);
+      }
     }
 
     toast.success(
