@@ -1,4 +1,6 @@
-import { useContext } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/router';
+import { useContext, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import Layout from '../components/Layout';
 import { AuthContext } from '../state/AuthContext';
@@ -6,9 +8,11 @@ import { CartContext } from '../state/CartContext';
 import { supabase } from '../utils/supabaseClient';
 
 const CartPage = () => {
-  const { cartWithQuantity, totalPrice } = useContext(CartContext);
+  const { cartWithQuantity, totalPrice, clearCart } = useContext(CartContext);
 
   const { dispatch } = useContext(AuthContext);
+
+  const router = useRouter();
 
   const handleCheckout = async () => {
     // now we will insert all the product items into the database order item table
@@ -22,14 +26,33 @@ const CartPage = () => {
       });
       return toast.error('You must be logged in to checkout');
     }
-    console.log(supabase.auth.session().user);
-    const { data, error } = await supabase.from('order').insert([
-      {
-        status: 'PENDING',
-        user_id: supabase.auth.session().user.id,
-      },
-    ]);
+
+    // we will call the endpoint `/checkout` to create order
+
+    try {
+      const { data } = await axios.post('api/checkout', {
+        customer_id: supabase.auth.session().user.id,
+        customer_email: supabase.auth.session().user.email,
+      });
+      if (!data) return toast.error('Error creating order');
+      router.push(data.session_url);
+    } catch (error) {
+      console.error(error);
+    }
   };
+
+  useEffect(() => {
+    const queries = router.query;
+    if (queries.success) {
+      clearCart();
+      toast.success('Order created successfully');
+    }
+
+    if (queries.cancel) {
+      toast.error('Error creating order, try again');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.query]);
 
   return (
     <Layout>
@@ -37,8 +60,8 @@ const CartPage = () => {
         <h1 className="my-4 text-4xl text-light">Cart</h1>
         {cartWithQuantity && (
           <div className="flex flex-col gap-y-4">
-            {cartWithQuantity.map((product, idx) => (
-              <div key={product.id + idx} className="flex flex-col gap-y-4">
+            {cartWithQuantity.map((product) => (
+              <div key={product.name} className="flex flex-col gap-y-4">
                 <p>
                   {product.name} x{product.quantity} = $
                   {product.quantity * product.price || 0}

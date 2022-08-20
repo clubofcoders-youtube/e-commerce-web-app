@@ -11,7 +11,7 @@ const Layout = ({ children }) => {
   const router = useRouter();
 
   const {
-    state: { isModalOpen, formType, session },
+    state: { isModalOpen, formType, session, userDetails },
     dispatch,
   } = useContext(AuthContext);
 
@@ -60,14 +60,16 @@ const Layout = ({ children }) => {
         )}
         {session && (
           <>
-            <div className="">
-              <button
-                className="px-4 py-2 text-lg text-white bg-black border border-black rounded hover:text-black hover:bg-white"
-                onClick={() => router.push('/admin')}
-              >
-                Admin
-              </button>
-            </div>
+            {userDetails?.role === 'ADMIN' && (
+              <div className="">
+                <button
+                  className="px-4 py-2 text-lg text-white bg-black border border-black rounded hover:text-black hover:bg-white"
+                  onClick={() => router.push('/admin')}
+                >
+                  Admin
+                </button>
+              </div>
+            )}
             <div className="">
               <button
                 className="px-4 py-2 text-lg text-white bg-black border border-black rounded hover:text-black hover:bg-white"

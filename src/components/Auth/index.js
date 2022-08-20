@@ -31,7 +31,7 @@ const Auth = () => {
         },
         {
           data: {
-            name: form.name,
+            full_name: form.name,
           },
         }
       );
@@ -41,11 +41,11 @@ const Auth = () => {
         return;
       }
 
-      await supabase.from('user').insert([
-        {
-          name: form.name,
-        },
-      ]);
+      // await supabase.from('user').insert([
+      //   {
+      //     name: form.name,
+      //   },
+      // ]);
     } else {
       const { error } = await supabase.auth.signIn({
         email: form.email,

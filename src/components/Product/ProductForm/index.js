@@ -1,6 +1,8 @@
-import React, { useRef, useState } from 'react';
+import { useRouter } from 'next/router';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import toast from 'react-hot-toast';
 import useForm from '../../../hooks/useForm';
+import { AuthContext } from '../../../state/AuthContext';
 import { supabase } from '../../../utils/supabaseClient';
 
 const ProductForm = () => {
@@ -13,7 +15,6 @@ const ProductForm = () => {
   });
 
   const [loading, setLoading] = useState(false);
-
   const imageFileRef = useRef(null);
   const [imageFile, setImageFile] = useState(null);
 
@@ -63,13 +64,25 @@ const ProductForm = () => {
       },
     ]);
 
-    if (error) return toast.error(error.message);
+    if (error) return showErrorToast(error.message, setLoading);
 
     toast.success('Product added successfully');
     resetForm();
     imageFileRef.current.value = '';
     setLoading(false);
   };
+
+  const {
+    state: { userDetails },
+  } = useContext(AuthContext);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    if (userDetails?.role !== 'ADMIN') {
+      router.push('/');
+    }
+  }, [userDetails, router]);
 
   return (
     <form onSubmit={handleSubmitProduct} className="mx-auto space-y-2 w-96 ">

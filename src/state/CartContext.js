@@ -16,18 +16,17 @@ export const CartContext = createContext({
 const CartContextProvider = ({ children }) => {
   const { products } = useContext(ProductsContext);
 
-  const { getItem } = useLocalStorage('cart');
-  const { setCartState, cartState, removeFromCart, addToCart, clearCart } =
+  const { cartState, removeFromCart, addToCart, clearCart, fetchCurrentCart } =
     useCart();
 
   // when the application run the first time
   // we will check if the cart is empty or not
-  // if not empty we will get the cart from localStorage and update the state
+  // if not empty we will get the cart from server and update the state
   useEffect(() => {
-    const localCart = getItem();
-    if (localCart) {
-      setCartState(localCart);
-    }
+    (async () => {
+      await fetchCurrentCart();
+    })();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

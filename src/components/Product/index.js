@@ -1,10 +1,19 @@
 import Image from 'next/image';
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import { CartContext } from '../../state/CartContext';
 import { AiOutlinePlus, AiOutlineMinus } from 'react-icons/ai';
+import { FaSpinner } from 'react-icons/fa';
 
 const Product = (product) => {
   const { cartState, removeFromCart, addToCart } = useContext(CartContext);
+
+  const [loading, setLoading] = useState(false);
+
+  const handleCartOperation = async (operation) => {
+    setLoading(true);
+    await operation;
+    setLoading(false);
+  };
 
   return (
     <div
@@ -26,29 +35,36 @@ const Product = (product) => {
       <p>
         <span className="text-gray-600">${product.price}</span>
       </p>
-      <div className="flex flex-col w-full space-x-0 space-y-2 lg:space-x-2 lg:space-y-0 lg:flex-row">
-        <button className="py-0.5 h-full text-lg w-full bg-black hover:text-black hover:bg-white border-black border text-white rounded">
+      <div className="flex flex-col w-full space-x-0 space-y-2 lg:justify-center lg:items-center lg:space-x-2 lg:space-y-0 lg:flex-row">
+        <button className="p-2 text-lg text-white bg-black border border-black rounded hover:text-black hover:bg-white">
           Buy now
         </button>
-        {!cartState[product.id] ? (
+        {!cartState[product.id] && !loading && (
           <button
-            className="py-0.5 h-full text-lg w-full bg-black hover:text-black hover:bg-white border-black border text-white rounded"
+            className="p-2 text-lg text-white bg-black border border-black rounded hover:text-black hover:bg-white"
             onClick={() => addToCart(product)}
+            disabled={loading}
           >
             Add to cart
           </button>
-        ) : (
-          <div className="flex items-center justify-center w-full gap-x-4">
+        )}
+        <div className="flex items-center justify-center">
+          {loading && <FaSpinner className="w-full text-lg animate-spin" />}
+        </div>
+        {cartState[product.id] && !loading && (
+          <div className="flex items-center justify-center gap-x-4">
             <button
-              className="py-0.5 h-full text-lg flex items-center justify-center w-full bg-black hover:text-black hover:bg-white border-black border text-white rounded"
-              onClick={() => removeFromCart(product)}
+              className="flex items-center justify-center p-2 text-lg text-white bg-black border border-black rounded hover:text-black hover:bg-white"
+              onClick={() => handleCartOperation(removeFromCart(product))}
+              disabled={loading}
             >
               <AiOutlineMinus />
             </button>
             {cartState[product.id]}
             <button
-              className="py-0.5 h-full text-lg flex items-center justify-center w-full bg-black hover:text-black hover:bg-white border-black border text-white rounded"
-              onClick={() => addToCart(product)}
+              className="flex items-center justify-center p-2 text-lg text-white bg-black border border-black rounded hover:text-black hover:bg-white"
+              onClick={() => handleCartOperation(addToCart(product))}
+              disabled={loading}
             >
               <AiOutlinePlus />
             </button>

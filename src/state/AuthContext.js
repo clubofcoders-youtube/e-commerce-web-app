@@ -5,6 +5,7 @@ const intialAuthState = {
   isModalOpen: false,
   formType: 'login',
   session: null,
+  userDetails: null,
 };
 
 export const AuthContext = createContext({
@@ -35,6 +36,11 @@ const authReducer = (state, action) => {
         ...state,
         session: null,
       };
+    case 'SET_USER_DETAILS':
+      return {
+        ...state,
+        userDetails: action.userDetails,
+      };
   }
 };
 
@@ -47,6 +53,18 @@ const AuthContextProvider = ({ children }) => {
       dispatch({ type: 'LOGIN', session });
     });
   }, []);
+
+  useEffect(() => {
+    if (!supabase.auth.session()) return;
+    (async () => {
+      const { data, error } = await supabase
+        .from('user')
+        .select('*')
+        .eq('id', supabase.auth.session().user.id);
+      if (error) return;
+      dispatch({ type: 'SET_USER_DETAILS', userDetails: data[0] });
+    })();
+  }, [state.session]);
 
   return (
     <AuthContext.Provider
